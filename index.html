@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HydroShield Long Island - Super Mario Water Restoration Edition</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        marioRed: '#E53935',
+                        marioGreen: '#2E7D32',
+                        marioSky: '#5C94FC',
+                        marioGold: '#FFD700',
+                        marioBrick: '#C84C0C',
+                        marioDark: '#0e1420',
+                        marioPipe: '#4CAF50'
+                    },
+                    fontFamily: {
+                        pixel: ['"Press Start 2P"', 'cursive'],
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome & Google Retro Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tone.js library for 8-bit Sound Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f17;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+
+        /* 8-Bit Pixel Borders & Shadows */
+        .pixel-box {
+            background-color: #161e2e;
+            border: 4px solid #ffffff;
+            box-shadow: 
+                -4px 0 0 0 #000,
+                4px 0 0 0 #000,
+                0 -4px 0 0 #000,
+                0 4px 0 0 #000,
+                 inset -4px -4px 0 0 #000;
+        }
+
+        .pixel-box-gold {
+            background-color: #2a2000;
+            border: 4px solid #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .pixel-box-pipe {
+            background: linear-gradient(90deg, #1b5e20 0%, #4caf50 50%, #1b5e20 100%);
+            border: 4px solid #ffffff;
+        }
+
+        .pixel-btn {
+            font-family: '"Press Start 2P"', cursive;
+            position: relative;
+            display: inline-block;
+            padding: 12px 20px;
+            text-transform: uppercase;
+            font-size: 10px;
+            transition: all 0.1s ease;
+            box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.5);
+            cursor: pointer;
+        }
+
+        .pixel-btn:active {
+            transform: translateY(3px);
+            box-shadow: inset 2px 2px 0px 0px rgba(0,0,0,0.5);
+        }
+
+        .pixel-btn-red {
+            background-color: #E53935;
+            color: #ffffff;
+            border: 3px solid #FFCDD2;
+        }
+        .pixel-btn-red:hover { background-color: #c62828; }
+
+        .pixel-btn-green {
+            background-color: #2E7D32;
+            color: #ffffff;
+            border: 3px solid #A5D6A7;
+        }
+        .pixel-btn-green:hover { background-color: #1b5e20; }
+
+        .pixel-btn-gold {
+            background-color: #FFD700;
+            color: #000000;
+            border: 3px solid #FFF9C4;
+        }
+        .pixel-btn-gold:hover { background-color: #ffb300; }
+
+        /* Super Mario Question Block Floating Effect */
+        .q-block {
+            background: #FFD700;
+            color: #000;
+            border: 4px solid #000;
+            box-shadow: inset -4px -4px 0 0 #c84c0c, inset 4px 4px 0 0 #fff;
+            animation: floatBlock 2s infinite ease-in-out;
+            cursor: pointer;
+        }
+        @keyframes floatBlock {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* Red Gem Jumping Animation */
+        @keyframes gemJump {
+            0%, 100% { 
+                transform: translateY(0px) scale(1);
+            }
+            50% { 
+                transform: translateY(-50px) scale(1.15);
+            }
+        }
+
+        .gem-jumping {
+            animation: gemJump 1.2s infinite ease-in-out;
+            cursor: pointer;
+        }
+
+        /* Page view transitions */
+        .page-section {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+        }
+        .page-section.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Coin Bounce Animation */
+        @keyframes coinUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            50% { transform: translateY(-40px) scale(1.3); opacity: 1; }
+            100% { transform: translateY(-70px) scale(0.8); opacity: 0; }
+        }
+        .coin-pop {
+            position: absolute;
+            animation: coinUp 0.8s forwards ease-out;
+            pointer-events: none;
+            color: #FFD700;
+            font-size: 20px;
+        }
+
+        /* Brick Pattern CSS */
+        .brick-bg {
+            background-color: #C84C0C;
+            background-image: 
+                linear-gradient(335deg, rgba(0,0,0,0.4) 23px, transparent 23px),
+                linear-gradient(155deg, rgba(255,255,255,0.2) 23px, transparent 23px);
+            background-size: 58px 58px;
+        }
+    </style>
+</head>
+<body class="bg-marioDark text-gray-100 min-h-screen flex flex-col justify-between">
+
+    <!-- MAIN RETRO NAV BAR -->
+    <header class="sticky top-0 z-40 px-2 sm:px-6 py-3 bg-marioDark/90 backdrop-blur-md border-b-4 border-white/20">
+        <nav class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            
+            <!-- Brand Logo -->
+            <a href="#" onclick="showPage('home'); return false;" class="flex items-center space-x-3 group">
+                <div class="w-10 h-10 bg-marioRed rounded-md flex items-center justify-center border-2 border-white text-white font-pixel text-xl shadow-md group-hover:scale-105 transition-transform">
+                    M
+                </div>
+                <div>
+                    <span class="font-pixel text-sm sm:text-base text-white tracking-wide block">HYDROSHIELD</span>
+                    <span class="text-[10px] text-marioGold font-semibold tracking-widest uppercase">MARIO LONG ISLAND</span>
+                </div>
+            </a>
+
+            <!-- Navigation Buttons (Warp Pipe & Block Style) -->
+            <div class="flex flex-wrap justify-center items-center gap-2">
+                <button onclick="showPage('home')" id="nav-home" class="pixel-btn pixel-btn-red text-white">HOME</button>
+                <button onclick="showPage('services')" id="nav-services" class="pixel-btn text-white bg-gray-800 hover:bg-gray-700 border-2 border-white">SERVICES</button>
+                <button onclick="showPage('about')" id="nav-about" class="pixel-btn text-white bg-gray-800 hover:bg-gray-700 border-2 border-white">ABOUT</button>
+                <button onclick="showPage('blog')" id="nav-blog" class="pixel-btn text-white bg-gray-800 hover:bg-gray-700 border-2 border-white">BLOG</button>
+                <button onclick="showPage('contact')" id="nav-contact" class="pixel-btn pixel-btn-gold">CASTLE CONTACT</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-8 py-8 flex-grow w-full relative">
+
+        <!-- ================= PAGE 1: HOME PAGE ================= -->
+        <section id="page-home" class="page-section active space-y-16">
+            
+            <!-- MARIO HERO BANNER -->
+            <div class="relative rounded-2xl p-6 sm:p-12 border-4 border-white bg-gradient-to-b from-marioSky via-blue-900 to-marioDark overflow-hidden shadow-2xl">
+                <div class="relative z-10 max-w-3xl space-y-6">
+                    <div class="inline-flex items-center space-x-2 px-3 py-1 bg-black/60 border-2 border-marioGold text-marioGold font-pixel text-[10px]">
+                        <i class="fa-solid fa-star animate-spin"></i>
+                        <span>STAGE 1-1: EMERGENCY WATER RESCUE</span>
+                    </div>
+
+                    <h1 class="text-2xl sm:text-4xl font-pixel text-white leading-relaxed">
+                        SUPER MARIO RESTORATION POWER-UP!
+                    </h1>
+
+                    <p class="text-sm sm:text-base text-gray-200 font-normal leading-relaxed">
+                        When floodwaters or burst pipes attack your Long Island castle, HydroShield Mario Restore stomps out moisture, dries structural walls, and eradicates mold monsters in record time!
+                    </p>
+
+                    <!-- Interactive Coin Block Trigger -->
+                    <div class="pt-2 flex flex-wrap items-center gap-4">
+                        <button onclick="showPage('contact')" class="pixel-btn pixel-btn-red py-4 px-6 text-xs">
+                            <i class="fa-solid fa-bell mr-2"></i> CALL DISPATCH HEROES
+                        </button>
+                        
+                        <div onclick="spawnCoin(event)" class="q-block w-12 h-12 flex items-center justify-center font-pixel text-xl font-bold rounded-sm select-none" title="Click for extra Mario coin!">
+                            ?
+                        </div>
+                        <span class="text-xs text-marioGold font-pixel animate-pulse hidden sm:inline">&lt; CLICK FOR POINTS!</span>
+                    </div>
+                </div>
+
+                <!-- Jumping Red Gem Sprite Visual with Jump Sound Trigger -->
+                <div class="absolute right-8 bottom-6 hidden md:flex flex-col items-center justify-center">
+                    <div id="red-gem-sprite" class="gem-jumping text-6xl text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)]">
+                        <i class="fa-solid fa-gem"></i>
+                    </div>
+                    <span class="text-[9px] font-pixel text-red-400 mt-2 bg-black/60 px-2 py-1 border border-red-500 rounded">RED POWER GEM</span>
+                </div>
+            </div>
+
+            <!-- MARIO SCOREBOARD STATS CARDS -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="pixel-box p-5 text-center space-y-2">
+                    <p class="font-pixel text-2xl text-marioRed">30 MINS</p>
+                    <p class="text-xs text-gray-400 font-semibold uppercase">Rapid Response Time</p>
+                </div>
+                <div class="pixel-box p-5 text-center space-y-2">
+                    <p class="font-pixel text-2xl text-marioGreen">100%</p>
+                    <p class="text-xs text-gray-400 font-semibold uppercase">Water Damage Defeated</p>
+                </div>
+                <div class="pixel-box p-5 text-center space-y-2">
+                    <p class="font-pixel text-2xl text-marioGold">3,500+</p>
+                    <p class="text-xs text-gray-400 font-semibold uppercase">Long Island Castles Saved</p>
+                </div>
+                <div class="pixel-box p-5 text-center space-y-2">
+                    <p class="font-pixel text-2xl text-marioSky">24/7/365</p>
+                    <p class="text-xs text-gray-400 font-semibold uppercase">Active Emergency Hotline</p>
+                </div>
+            </div>
+
+            <!-- MARIO POWER-UP SERVICES GRID -->
+            <div class="space-y-8">
+                <div class="text-center space-y-2">
+                    <h2 class="font-pixel text-xl sm:text-2xl text-marioGold">SPECIAL RESTORATION POWER-UPS</h2>
+                    <p class="text-gray-400 text-xs sm:text-sm">High-tech equipment engineered for residential and commercial recovery across Long Island.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Card 1 -->
+                    <div class="pixel-box p-6 space-y-4 hover:border-marioRed transition-colors">
+                        <div class="w-12 h-12 bg-marioRed/20 text-marioRed rounded-md flex items-center justify-center font-pixel text-xl border-2 border-marioRed">
+                            <i class="fa-solid fa-wind"></i>
+                        </div>
+                        <h3 class="font-pixel text-sm text-white">Super Structural Drying</h3>
+                        <p class="text-xs text-gray-300 leading-relaxed">Heavy-duty LGR dehumidifiers and axial air movers pull deep moisture out of walls and subflooring.</p>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="pixel-box p-6 space-y-4 hover:border-marioGreen transition-colors">
+                        <div class="w-12 h-12 bg-marioGreen/20 text-emerald-400 rounded-md flex items-center justify-center font-pixel text-xl border-2 border-marioGreen">
+                            <i class="fa-solid fa-camera"></i>
+                        </div>
+                        <h3 class="font-pixel text-sm text-white">Infrared Thermal Scanner</h3>
+                        <p class="text-xs text-gray-300 leading-relaxed">FLIR thermal scanning isolates hidden wet pockets behind tile, masonry, and wall cavities instantly.</p>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="pixel-box p-6 space-y-4 hover:border-marioGold transition-colors">
+                        <div class="w-12 h-12 bg-marioGold/20 text-marioGold rounded-md flex items-center justify-center font-pixel text-xl border-2 border-marioGold">
+                            <i class="fa-solid fa-spray-can-sparkles"></i>
+                        </div>
+                        <h3 class="font-pixel text-sm text-white">Antimicrobial Sanitizer</h3>
+                        <p class="text-xs text-gray-300 leading-relaxed">Hospital-grade EPA botanical sprays safeguard your castle against black mold spores and bacteria.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MARIO HERO CALL TO ACTION -->
+            <div class="brick-bg rounded-2xl p-8 border-4 border-white text-center space-y-6">
+                <h2 class="font-pixel text-xl sm:text-3xl text-white drop-shadow-md">NEED IMMEDIATE EMERGENCY WATER DISPATCH?</h2>
+                <p class="text-gray-100 text-xs sm:text-sm max-w-xl mx-auto font-medium">Do not let water damage destroy your home's foundation. Our Long Island team is ready to deploy!</p>
+                <button onclick="showPage('contact')" class="pixel-btn pixel-btn-gold px-8 py-4 text-xs font-bold">
+                    REQUEST EMERGENCY INSPECTION
+                </button>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 2: SERVICES PAGE ================= -->
+        <section id="page-services" class="page-section space-y-12">
+            <div class="text-center space-y-3">
+                <span class="font-pixel text-[10px] text-marioGreen bg-emerald-950 px-3 py-1 border border-marioGreen">STAGE 1-2: UNDERGROUND PIPELINE SERVICES</span>
+                <h1 class="font-pixel text-2xl sm:text-3xl text-white">MARIO RESTORATION MISSIONS</h1>
+                <p class="text-xs sm:text-sm text-gray-400 max-w-2xl mx-auto">Full-spectrum certified water recovery solutions for Long Island properties.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Mission 1 -->
+                <div class="pixel-box p-6 space-y-4 border-l-8 border-l-marioRed">
+                    <div class="flex justify-between items-center">
+                        <span class="font-pixel text-xs text-marioRed">MISSION 01</span>
+                        <i class="fa-solid fa-faucet-drip text-marioRed text-xl"></i>
+                    </div>
+                    <h3 class="font-pixel text-sm text-white">Emergency Water Extraction</h3>
+                    <p class="text-xs text-gray-300 leading-relaxed">
+                        High-powered truck-mounted pumps capable of removing thousands of gallons of standing water per hour from flooded basements and commercial suites.
+                    </p>
+                </div>
+
+                <!-- Mission 2 -->
+                <div class="pixel-box p-6 space-y-4 border-l-8 border-l-marioGreen">
+                    <div class="flex justify-between items-center">
+                        <span class="font-pixel text-xs text-emerald-400">MISSION 02</span>
+                        <i class="fa-solid fa-shield-virus text-emerald-400 text-xl"></i>
+                    </div>
+                    <h3 class="font-pixel text-sm text-white">Mold Eradication & Containment</h3>
+                    <p class="text-xs text-gray-300 leading-relaxed">
+                        Negative air pressure locks and HEPA air scrubbers prevent toxic mold spores from spreading while completely sanitizing damp materials.
+                    </p>
+                </div>
+
+                <!-- Mission 3 -->
+                <div class="pixel-box p-6 space-y-4 border-l-8 border-l-marioGold">
+                    <div class="flex justify-between items-center">
+                        <span class="font-pixel text-xs text-marioGold">MISSION 03</span>
+                        <i class="fa-solid fa-box-tissue text-marioGold text-xl"></i>
+                    </div>
+                    <h3 class="font-pixel text-sm text-white">Structural Dehumidification</h3>
+                    <p class="text-xs text-gray-300 leading-relaxed">
+                        Precision drying using heat-energy injectors and desiccant units that pull deep moisture out of hardwood floors, drywall, and plaster.
+                    </p>
+                </div>
+
+                <!-- Mission 4 -->
+                <div class="pixel-box p-6 space-y-4 border-l-8 border-l-marioSky">
+                    <div class="flex justify-between items-center">
+                        <span class="font-pixel text-xs text-marioSky">MISSION 04</span>
+                        <i class="fa-solid fa-hammer text-marioSky text-xl"></i>
+                    </div>
+                    <h3 class="font-pixel text-sm text-white">Full Castle Reconstruction</h3>
+                    <p class="text-xs text-gray-300 leading-relaxed">
+                        From drywall repair and trim carpentry to complete room rebuilding, our team restores your property to pre-loss condition with direct insurance handling.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 3: ABOUT PAGE ================= -->
+        <section id="page-about" class="page-section space-y-12">
+            <div class="text-center space-y-3">
+                <span class="font-pixel text-[10px] text-marioGold bg-yellow-950 px-3 py-1 border border-marioGold">WORLD 1-3: OUR HERO STORY</span>
+                <h1 class="font-pixel text-2xl sm:text-3xl text-white">THE HYDROSHIELD MARIO LEGACY</h1>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="pixel-box p-6 space-y-4">
+                    <h2 class="font-pixel text-base text-marioGold">DEFENDING LONG ISLAND CASTLES</h2>
+                    <p class="text-xs text-gray-300 leading-relaxed">
+                        Water damage is like a monster invading your castle. Founded with a commitment to speed, precision, and 8-bit reliability, HydroShield Mario Restore brings top-tier environmental restoration to homeowners across Nassau and Suffolk counties.
+                    </p>
+                    <p class="text-xs text-gray-300 leading-relaxed">
+                        Every crew member is IICRC-certified and trained in thermodynamic structural drying techniques, ensuring your home is protected from hidden moisture and structural rot.
+                    </p>
+                </div>
+
+                <div class="pixel-box p-4 border-marioRed">
+                    <img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=800&q=80" alt="Restoration Equipment" class="rounded border-2 border-white w-full h-64 object-cover">
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 4: BLOG PAGE (1,200+ Words Guide) ================= -->
+        <section id="page-blog" class="page-section space-y-8">
+            
+            <div class="pixel-box-gold p-6 sm:p-10 space-y-4">
+                <span class="font-pixel text-[9px] text-marioGold uppercase">EXPERT RESTORATION GUIDE</span>
+                <h1 class="font-pixel text-lg sm:text-2xl text-white leading-relaxed">
+                    Comprehensive Guide to Professional Emergency Water Damage Restoration in Long Island Properties
+                </h1>
+                <p class="text-xs text-gray-300">Detailed structural moisture analysis, extraction techniques, and health risk mitigation for Long Island property owners.</p>
+            </div>
+
+            <!-- BLOG ARTICLE BODY CONTENT -->
+            <div class="pixel-box p-6 sm:p-10 space-y-8 text-gray-300 text-sm leading-relaxed">
+                
+                <!-- SECTION 1 -->
+                <div class="space-y-4">
+                    <h2 class="font-pixel text-sm sm:text-base text-marioGold">
+                        1. The Critical Reality of Structural Moisture in Long Island Homes
+                    </h2>
+                    <p>
+                        Long Island’s unique geographic positioning creates an intricate set of environmental challenges for residential and commercial structures. Bordered by the Atlantic Ocean and Long Island Sound, properties across Nassau and Suffolk counties endure high ambient relative humidity, frequent severe coastal weather fronts, and drastic seasonal temperature shifts. When sudden indoor flooding occurs—whether caused by a ruptured water heater in Melville, a sump pump failure in Garden City, or coastal storm water intrusion in Freeport—the structural response must be immediate and scientifically precise.
+                    </p>
+                    <p>
+                        Water is inherently opportunistic. Upon entering a building envelope, it immediately migrates along the path of least resistance, saturating porous materials such as drywall, plywood subflooring, wood joists, insulation, and carpeting. Within the first hour of exposure, uncontained water expands outward, causing timber framing to swell, paint to blister, and electrical pathways to corrode. If you are currently facing unexpected flooding or plumbing failure, securing immediate expert assistance for <a href="https://quickwaterrestore.com/" target="_blank" rel="noopener" class="text-marioRed hover:text-red-400 font-bold underline underline-offset-4">Water Damage Restoration in Long Island</a> is essential to halt progressive structural decay and protect your real estate investment.
+                    </p>
+                </div>
+
+                <!-- SECTION 2 -->
+                <div class="space-y-4">
+                    <h2 class="font-pixel text-sm sm:text-base text-marioGold">
+                        2. Categories and Classes of Water Contamination Explained
+                    </h2>
+                    <p>
+                        Professional environmental restoration specialists classify water intrusion events based on contamination levels (Categories) and the physical rate of evaporation required (Classes). Accurately identifying these parameters determines the necessary personal protective equipment (PPE), containment protocols, and extraction machinery required for safe restoration.
+                    </p>
+
+                    <h3 class="font-pixel text-xs text-emerald-400 pt-2">
+                        Categorization of Water Intrusion
+                    </h3>
+                    <p>
+                        <strong>Category 1 (Clean Water):</strong> Originates from sanitary sources such as broken clean water supply lines, overflowing clean sinks, or melted ice. While initially non-hazardous, Category 1 water can rapidly degrade into Category 2 within 24 to 48 hours if left stagnant in warm ambient temperatures.
+                    </p>
+                    <p>
+                        <strong>Category 2 (Gray Water):</strong> Contains significant chemical, biological, or physical contaminants capable of causing discomfort or illness. Examples include discharge from washing machines, dishwasher overflows, or sump pump pit failures containing microbial activity.
+                    </p>
+                    <p>
+                        <strong>Category 3 (Black Water):</strong> Grossly contaminated water containing dangerous pathogenic agents, heavy metals, or toxic organic compounds. Sources include sewage backups, sea water surges, and rising river flooding. Category 3 events demand strict negative-pressure containment and specialized disposal of porous building materials.
+                    </p>
+
+                    <h3 class="font-pixel text-xs text-emerald-400 pt-2">
+                        Classifications of Moisture Absorbency
+                    </h3>
+                    <p>
+                        <strong>Class 1:</strong> Slow rate of evaporation affecting only a small portion of a room with low-permeability materials like concrete or tile.
+                    </p>
+                    <p>
+                        <strong>Class 2:</strong> Fast rate of evaporation affecting an entire room, carpet, and cushion, with moisture ascending up drywall less than 24 inches.
+                    </p>
+                    <p>
+                        <strong>Class 3:</strong> Fastest rate of evaporation where water typically comes from overhead, saturating ceiling tiles, structural insulation, drywall, and subfloors throughout the entire enclosure.
+                    </p>
+                    <p>
+                        <strong>Class 4:</strong> Specialty drying situations involving deeply bound moisture trapped in low-porosity materials such as hardwood, brick, plaster, and stone masonry.
+                    </p>
+                </div>
+
+                <!-- SECTION 3 -->
+                <div class="space-y-4">
+                    <h2 class="font-pixel text-sm sm:text-base text-marioGold">
+                        3. The Step-by-Step Professional Mitigation Protocol
+                    </h2>
+                    <p>
+                        When certified technicians arrive on-site across Long Island, they follow a rigorous, standardized multi-stage restoration procedure engineered to minimize structural loss and eliminate indoor health risks.
+                    </p>
+
+                    <h3 class="font-pixel text-xs text-emerald-400 pt-2">
+                        Stage A: Emergency Thermal Inspection & Hazard Assessment
+                    </h3>
+                    <p>
+                        Before starting extraction, technicians conduct an immediate structural analysis using FLIR (Forward-Looking Infrared) thermal imagery cameras and non-penetrating moisture meters. Thermal imaging identifies invisible thermal anomalies created by evaporative cooling, pinpointing moisture trapped inside wall cavities and beneath tile floors without destructive demolition.
+                    </p>
+
+                    <h3 class="font-pixel text-xs text-emerald-400 pt-2">
+                        Stage B: Industrial Bulk Water Extraction
+                    </h3>
+                    <p>
+                        Extracting standing liquid water is up to 500 times more energy-efficient than removing it through evaporation alone. Industrial truck-mounted extraction units and weighted subfloor extraction mats are deployed immediately to pull liquid water directly out of carpet padding and joists.
+                    </p>
+
+                    <h3 class="font-pixel text-xs text-emerald-400 pt-2">
+                        Stage C: Controlled Evaporation & Psychrometric Drying
+                    </h3>
+                    <p>
+                        Once surface liquid is removed, technicians balance psychrometrics—the science of dry air, relative humidity, temperature, and vapor pressure. High-velocity axial air movers generate laminar airflow across wet surfaces, vaporizing bound moisture.
+                    </p>
+                </div>
+
+                <!-- SECTION 4 -->
+                <div class="space-y-4">
+                    <h2 class="font-pixel text-sm sm:text-base text-marioGold">
+                        4. Preventing Secondary Mold Contamination in Coastal Climates
+                    </h2>
+                    <p>
+                        Mold spores are naturally present in outdoor and indoor environments. However, mold spores require three vital elements to colonize: organic food source (drywall paper, wood), oxygen, and moisture above 60% relative humidity. In the warm summer months on Long Island, dormant fungal spores can germinate on damp drywall in as little as 24 to 48 hours following a flood event.
+                    </p>
+                    <p>
+                        Timely execution of professional <a href="https://quickwaterrestore.com/" target="_blank" rel="noopener" class="text-marioGreen hover:text-emerald-300 font-bold underline underline-offset-4">Water Damage Restoration in Long Island</a> prevents relative humidity spikes inside the building envelope, depriving fungal spores of the moisture required for amplification.
+                    </p>
+                </div>
+
+                <!-- SECTION 5 -->
+                <div class="space-y-4">
+                    <h2 class="font-pixel text-sm sm:text-base text-marioGold">
+                        5. Navigating Insurance Claims & Documentation Standards
+                    </h2>
+                    <p>
+                        Filing an insurance claim following a major water loss can be daunting for property owners. Insurance adjusters require meticulous digital evidence, moisture readings, and itemized structural inventories before approving claim payouts. Professional restoration teams utilize standardized industry pricing software (such as Xactimate) and maintain daily atmospheric log sheets to ensure full policy coverage.
+                    </p>
+                </div>
+
+                <!-- CONCLUSION -->
+                <div class="space-y-4 pt-4 border-t border-white/20">
+                    <h2 class="font-pixel text-sm sm:text-base text-marioGold">
+                        Summary and Actionable Conclusion
+                    </h2>
+                    <p>
+                        Water damage is a time-critical emergency that requires precision engineering, rapid response times, and specialized restoration equipment. Ignoring small leaks or delaying basement flood cleanup can lead to severe structural rot and black mold colonies. Relying on proven local specialists skilled in <a href="https://quickwaterrestore.com/" target="_blank" rel="noopener" class="text-marioRed hover:text-red-400 font-bold underline underline-offset-4">Water Damage Restoration in Long Island</a> guarantees immediate peace of mind and structural security.
+                    </p>
+                </div>
+
+                <!-- FNP (Frequently Noted Points / FAQ) -->
+                <div class="space-y-4 pt-6 bg-black/40 p-6 border-2 border-marioGold">
+                    <h2 class="font-pixel text-xs text-marioGold uppercase">
+                        Frequently Noted Points (FNP)
+                    </h2>
+                    <div class="space-y-3 text-xs">
+                        <p><strong>Q: How fast should water extraction begin after a flood?</strong><br/>
+                        A: Water extraction should begin immediately, ideally within 1 to 2 hours of the incident.</p>
+                        <p><strong>Q: Can carpet and padding be saved after water damage?</strong><br/>
+                        A: Clean water (Category 1) damage can often be saved if treated within 24 hours.</p>
+                        <p><strong>Q: How long does the drying process take?</strong><br/>
+                        A: Professional structural drying typically takes 3 to 5 days.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ================= PAGE 5: CONTACT PAGE (Castle Form) ================= -->
+        <section id="page-contact" class="page-section space-y-12">
+            <div class="text-center space-y-3">
+                <span class="font-pixel text-[10px] text-marioGold bg-yellow-950 px-3 py-1 border border-marioGold">CASTLE DISPATCH PORTAL</span>
+                <h1 class="font-pixel text-2xl sm:text-3xl text-white">SEND MESSAGE TO MARIO HQ</h1>
+                <p class="text-xs sm:text-sm text-gray-400">Enter your emergency details below for immediate crew dispatch across Long Island.</p>
+            </div>
+
+            <!-- CASTLE FORM CONTAINER -->
+            <div class="max-w-2xl mx-auto pixel-box p-6 sm:p-10 border-2 border-marioGold relative">
+                <form id="mario-contact-form" onsubmit="handleMarioSubmit(event)" class="space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="font-pixel text-[10px] text-marioGold block">YOUR NAME *</label>
+                            <input type="text" required placeholder="e.g. Mario Hero" class="w-full p-3 bg-black border-2 border-white text-white focus:outline-none focus:border-marioGold text-xs">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="font-pixel text-[10px] text-marioGold block">PHONE NUMBER *</label>
+                            <input type="tel" required placeholder="e.g. (516) 555-0199" class="w-full p-3 bg-black border-2 border-white text-white focus:outline-none focus:border-marioGold text-xs">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="font-pixel text-[10px] text-marioGold block">EMAIL ADDRESS *</label>
+                            <input type="email" required placeholder="e.g. hero@castle.com" class="w-full p-3 bg-black border-2 border-white text-white focus:outline-none focus:border-marioGold text-xs">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="font-pixel text-[10px] text-marioGold block">LONG ISLAND LOCATION *</label>
+                            <select required class="w-full p-3 bg-black border-2 border-white text-white focus:outline-none focus:border-marioGold text-xs">
+                                <option value="" disabled selected>Select Area</option>
+                                <option value="nassau">Nassau County</option>
+                                <option value="suffolk">Suffolk County</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="font-pixel text-[10px] text-marioGold block">EMERGENCY MESSAGE *</label>
+                        <textarea rows="4" required placeholder="Describe flooded areas, standing water depth..." class="w-full p-3 bg-black border-2 border-white text-white focus:outline-none focus:border-marioGold text-xs"></textarea>
+                    </div>
+
+                    <button type="submit" class="pixel-btn pixel-btn-red w-full py-4 text-xs font-bold">
+                        <i class="fa-solid fa-flag-checkered mr-2"></i> TRANSMIT EMERGENCY DISPATCH TICKET
+                    </button>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MARIO LEVEL CLEAR MODAL -->
+    <div id="mario-modal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-4">
+        <div class="pixel-box-gold max-w-md w-full p-8 text-center space-y-6 border-4 border-marioGold">
+            <div class="text-4xl text-marioGold animate-bounce">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <h3 class="font-pixel text-lg text-white">LEVEL CLEAR! FLAG RAISED!</h3>
+            <p class="text-xs text-gray-300 leading-relaxed font-sans">
+                Your emergency request has reached Mario HQ! An on-duty emergency team will contact your phone within 5 minutes.
+            </p>
+            <button onclick="closeMarioModal()" class="pixel-btn pixel-btn-green w-full py-3 text-xs">
+                RETURN TO CASTLE
+            </button>
+        </div>
+    </div>
+
+    <!-- RETRO FOOTER -->
+    <footer class="border-t-4 border-white/20 bg-black py-8 mt-12 text-center text-xs text-gray-400 font-pixel">
+        <p class="text-marioGold mb-2">HYDROSHIELD MARIO RESTORATION LONG ISLAND</p>
+        <p class="text-[9px] text-gray-500">&copy; 2026 HydroShield. All Rights Reserved.</p>
+    </footer>
+
+    <!-- JAVASCRIPT GAME LOGIC -->
+    <script>
+        let coins = 99;
+        let audioInitialized = false;
+
+        // Sound Effects Synthesizers via Tone.js
+        let synth, coinSynth;
+
+        function initAudio() {
+            if (audioInitialized) return;
+            Tone.start();
+
+            // Synth for Gem Jump sound (quick pitch slide up)
+            synth = new Tone.Synth({
+                oscillator: { type: "square" },
+                envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 }
+            }).toDestination();
+            synth.volume.value = -12;
+
+            // Synth for Coin collection chime (dual note)
+            coinSynth = new Tone.Synth({
+                oscillator: { type: "triangle" },
+                envelope: { attack: 0.01, decay: 0.15, sustain: 0.05, release: 0.1 }
+            }).toDestination();
+            coinSynth.volume.value = -8;
+
+            audioInitialized = true;
+            startGemJumpSoundLoop();
+        }
+
+        // Play 8-Bit Gem Jump Sound
+        function playJumpSound() {
+            if (!audioInitialized) return;
+            try {
+                const now = Tone.now();
+                synth.triggerAttackRelease("B4", "16n", now);
+                synth.triggerAttackRelease("E5", "16n", now + 0.06);
+            } catch(e) {}
+        }
+
+        // Play 8-Bit Coin Sound
+        function playCoinSound() {
+            if (!audioInitialized) return;
+            try {
+                const now = Tone.now();
+                coinSynth.triggerAttackRelease("B5", "16n", now);
+                coinSynth.triggerAttackRelease("E6", "8n", now + 0.08);
+            } catch(e) {}
+        }
+
+        // Loop jump sound synchronized with the CSS animation keyframe apex (every 1.2 seconds)
+        function startGemJumpSoundLoop() {
+            setInterval(() => {
+                const homePage = document.getElementById('page-home');
+                if (homePage && homePage.classList.contains('active')) {
+                    playJumpSound();
+                }
+            }, 1200);
+        }
+
+        function showPage(pageId) {
+            initAudio();
+            const pages = document.querySelectorAll('.page-section');
+            pages.forEach(page => page.classList.remove('active'));
+
+            const target = document.getElementById('page-' + pageId);
+            if (target) target.classList.add('active');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function spawnCoin(e) {
+            initAudio();
+            playCoinSound();
+
+            coins++;
+            const counterEl = document.getElementById('coin-counter');
+            if (counterEl) {
+                counterEl.innerText = coins;
+            }
+
+            const coin = document.createElement('div');
+            coin.className = 'coin-pop font-pixel';
+            coin.innerText = '+1 POINT!';
+            coin.style.left = e.clientX + 'px';
+            coin.style.top = e.clientY + 'px';
+            document.body.appendChild(coin);
+
+            setTimeout(() => coin.remove(), 800);
+        }
+
+        // Enable audio on first click anywhere on page
+        document.addEventListener('click', () => {
+            initAudio();
+        }, { once: true });
+
+        function handleMarioSubmit(e) {
+            e.preventDefault();
+            document.getElementById('mario-modal').classList.remove('hidden');
+            document.getElementById('mario-contact-form').reset();
+        }
+
+        function closeMarioModal() {
+            document.getElementById('mario-modal').classList.add('hidden');
+            showPage('home');
+        }
+    </script>
+</body>
+</html>
